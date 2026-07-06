@@ -1,0 +1,62 @@
+[2026-07-06 15:43:18] [ERROR] TELEGRAM_TOKEN is not set in the environment variables.
+[2026-07-06 15:43:48] [ERROR] TELEGRAM_TOKEN is not set in the environment variables.
+[2026-07-06 15:44:55] [ERROR] TELEGRAM_TOKEN is not set in the environment variables.
+[2026-07-06 15:53:17] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 15:53:26] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 15:57:48] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 15:58:02] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 15:58:05] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 16:33:40] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 16:33:50] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 16:33:52] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 16:35:54] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 16:36:07] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 18:27:39] [INFO] Shutting down in 50 seconds before
+[2026-07-06 18:28:08] [INFO] Restarting in 50 seconds before
+[2026-07-06 18:29:25] [ERROR] Failed to hibernate the system: cannot access local variable 'WAIT' where it is not associated with a value
+[2026-07-06 18:32:39] [ERROR] Failed to hibernate the system: Command '['shutdown', '/h', '/t', '50']' returned non-zero exit status 1.
+[2026-07-06 18:46:49] [ERROR] Failed to hibernate the system: 'builtin_function_or_method' object has no attribute 'time'
+[2026-07-06 19:01:40] [INFO] Hibernation aborted by user.
+[2026-07-06 20:12:56] [ERROR] Failed to abort the shutdown: Command '['shutdown', '/a']' returned non-zero exit status 1116.
+[2026-07-06 20:12:56] [ERROR] Failed to get system uptime: Command 'net stats srv' returned non-zero exit status 1.
+[2026-07-06 20:12:56] [ERROR] Failed to get system uptime: Command 'net stats srv' returned non-zero exit status 1.
+[2026-07-06 20:14:03] [INFO] Hibernate countdown started.
+[2026-07-06 20:16:44] [INFO] Hibernate countdown started.
+[2026-07-06 20:20:55] [INFO] Hibernate countdown started.
+[2026-07-06 20:20:58] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 20:27:54] [ERROR] Failed to get system uptime: Command 'net stats srv' returned non-zero exit status 1.
+[2026-07-06 20:28:01] [INFO] Hibernate countdown started.
+[2026-07-06 20:28:03] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 20:28:23] [INFO] Bot started. Listening for commands...
+[2026-07-06 20:28:30] [INFO] Hibernate countdown started.
+[2026-07-06 20:28:32] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 20:41:55] [INFO] Bot started. Listening for commands...
+[2026-07-06 20:42:08] [WARNING] Unauthorized access attempt by user 8253052066 (@None)
+[2026-07-06 20:43:33] [INFO] Bot started. Listening for commands...
+[2026-07-06 20:45:17] [INFO] Bot started. Listening for commands...
+[2026-07-06 20:47:08] [INFO] Bot started. Listening for commands...
+[2026-07-06 20:47:33] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 20:50:56] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 20:51:26] [INFO] Hibernate countdown started.
+[2026-07-06 20:51:28] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 21:18:35] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 21:18:53] [INFO] Hibernate countdown started.
+[2026-07-06 21:18:54] [INFO] Previous hibernation task cancelled.
+[2026-07-06 21:18:54] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 21:18:54] [INFO] Hibernate countdown started.
+[2026-07-06 21:18:56] [INFO] Previous hibernation task cancelled.
+[2026-07-06 21:18:56] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 21:18:56] [INFO] Hibernate countdown started.
+[2026-07-06 21:19:04] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 21:19:36] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 21:19:37] [INFO] Hibernate countdown started.
+[2026-07-06 21:19:38] [INFO] Previous hibernation task cancelled.
+[2026-07-06 21:19:38] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 21:19:39] [INFO] Hibernate countdown started.
+[2026-07-06 21:19:48] [INFO] Hibernation task was cancelled successfully via code.
+[2026-07-06 21:23:24] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 21:26:36] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 22:38:26] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 22:40:21] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 22:41:22] [INFO] Bot is ready and running as: ma7llmprivbot.
+[2026-07-06 22:43:02] [INFO] Bot is ready and running as: ma7llmprivbot.
