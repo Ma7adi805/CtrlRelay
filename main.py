@@ -5,6 +5,7 @@ from telegram import Update, BotCommand, InlineKeyboardButton, InlineKeyboardMar
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler
 from telegram.constants import ParseMode
 from core.auth import restricted
+from handlers.manager import ManagerHandler
 from utils.logger import logger
 from core.settings import BOT_TOKEN
 import handlers.power as power
@@ -65,6 +66,8 @@ def main():
     app.add_handler(CommandHandler("help_power", PowerManagerCmd.help_power_command))
     app.add_handler(CommandHandler("lock", PowerManagerCmd.lock_system))
     app.add_handler(CallbackQueryHandler(onButtonClick))
+    app.add_handler(CommandHandler("screenshot", ManagerHandler.screenshot))
+    app.add_handler(CommandHandler("sysinfo", ManagerHandler.sysinfo))
     app.run_polling()
 
 if __name__ == "__main__":
