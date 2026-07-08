@@ -5,7 +5,7 @@ import core.settings as settings_core
 from core.settings import reload_settings
 from utils.logger import logger
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 from time import sleep as time_sleep
 
 HibernationTask: asyncio.Task = None  
@@ -340,6 +340,7 @@ class PowerManagerCmd:
 
     @restricted
     async def help_power_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        reload_settings()
         enabled = settings_core.POWER_MANAGEMENT
 
         commands_text = (
@@ -364,3 +365,19 @@ class PowerManagerCmd:
         message = update.effective_message
         if message:
             await message.reply_text(help_text, parse_mode="HTML")
+
+
+def setup(app:Application):
+    """Set up the Power commands."""
+    app.add_handler(CommandHandler("power_off", PowerManagerCmd.power_off))
+    app.add_handler(CommandHandler("abort_shutdown", PowerManagerCmd.abort_shutdown))
+    app.add_handler(CommandHandler("restart", PowerManagerCmd.restart))
+    app.add_handler(CommandHandler("abort_restart", PowerManagerCmd.abort_restart))
+    app.add_handler(CommandHandler("get_uptime", PowerManagerCmd.get_uptime))
+    app.add_handler(CommandHandler("sleep", PowerManagerCmd.sleep))
+    app.add_handler(CommandHandler("hibernate", PowerManagerCmd.hibernate))
+    app.add_handler(CommandHandler("abort_hibernate", PowerManagerCmd.abort_hibernate))
+    app.add_handler(CommandHandler("lock", PowerManagerCmd.lock_system))
+    app.add_handler(CommandHandler("help_power", PowerManagerCmd.help_power_command))
+
+    app.add_handler(CallbackQueryHandler(PowerManagerCmd.help_power_command, pattern="help_power"))

@@ -34,3 +34,6 @@ $RECYCLE.BIN/
 # CtrlRelay specific
 ctrlrelay.log
 downloads/
+
+# Json files
+*.json
