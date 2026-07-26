@@ -297,6 +297,99 @@ def get_audio_volume() -> int | None:
     except Exception:
         return None
 
+
+def mute_audio() -> str:
+    """
+    Mute the system audio.
+    """
+
+    current_os = platform.system()
+
+    try:
+        if current_os == "Windows":
+            from pycaw.pycaw import AudioUtilities
+
+            device = AudioUtilities.GetSpeakers()
+            device.EndpointVolume.SetMute(1, None)
+
+            return "✅ Audio muted"
+
+        elif current_os == "Darwin":
+            subprocess.run(
+                [
+                    "osascript",
+                    "-e",
+                    "set volume output muted true"
+                ],
+                check=True
+            )
+            return "✅ Audio muted"
+
+        elif current_os == "Linux":
+            subprocess.run(
+                [
+                    "pactl",
+                    "set-sink-mute",
+                    "@DEFAULT_SINK@",
+                    "1"
+                ],
+                check=True
+            )
+            return "✅ Audio muted"
+
+        else:
+            return f"❌ Unsupported OS: {current_os}"
+
+    except Exception as e:
+        return f"❌ Failed to mute audio: {e}"
+        
+
+def unmute_audio() -> str:
+    """
+    Unmute the system audio.
+    """
+
+    current_os = platform.system()
+
+    try:
+        if current_os == "Windows":
+            from pycaw.pycaw import AudioUtilities
+
+            device = AudioUtilities.GetSpeakers()
+            device.EndpointVolume.SetMute(0, None)
+
+            return "✅ Audio unmuted"
+
+        elif current_os == "Darwin":
+            subprocess.run(
+                [
+                    "osascript",
+                    "-e",
+                    "set volume output muted false"
+                ],
+                check=True
+            )
+            return "✅ Audio unmuted"
+
+        elif current_os == "Linux":
+            subprocess.run(
+                [
+                    "pactl",
+                    "set-sink-mute",
+                    "@DEFAULT_SINK@",
+                    "0"
+                ],
+                check=True
+            )
+            return "✅ Audio unmuted"
+
+        else:
+            return f"❌ Unsupported OS: {current_os}"
+
+    except Exception as e:
+        return f"❌ Failed to unmute audio: {e}"
+
+
 """
 print("Available Output Audio Devices:")
 for device in get_clean_output_devices():

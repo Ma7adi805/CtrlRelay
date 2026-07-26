@@ -34,13 +34,37 @@ def power(func):
     return wrapper
 
 
-def processManagment(func):
+def processManagement(func):
     """Decorator — restricts access to process management commands."""
     @wraps(func)
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
         settings_core.reload_settings()
         if not settings_core.PROCESS_MANAGEMENT:
             await update.message.reply_text("❌ Process management is disabled\\.\nPlease enable `PROCESS_MANAGEMENT` in the \\.env file to use this command\\.", parse_mode=ParseMode.MARKDOWN_V2)
+            return
+        return await func(update, context, *args, **kwargs)
+    return wrapper
+
+
+def typeManagement(func):
+    """Decorator — restricts access to type management commands."""
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        settings_core.reload_settings()
+        if not settings_core.TYPE_ENABLED:
+            await update.message.reply_text("❌ Type management is disabled\\.\nPlease enable `TYPE_ENABLED` in the \\.env file to use this command\\.", parse_mode=ParseMode.MARKDOWN_V2)
+            return
+        return await func(update, context, *args, **kwargs)
+    return wrapper
+
+
+def runCommand(func):
+    """Decorator — restricts access to run command."""
+    @wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+        settings_core.reload_settings()
+        if not settings_core.RUN_COMMAND_ENABLED:
+            await update.message.reply_text("❌ Run command is disabled\\.\nPlease enable `RUN_COMMAND_ENABLED` in the \\.env file to use this command\\.", parse_mode=ParseMode.MARKDOWN_V2)
             return
         return await func(update, context, *args, **kwargs)
     return wrapper

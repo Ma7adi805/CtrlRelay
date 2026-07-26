@@ -24,7 +24,7 @@ def reload_settings():
     ALLOWED_PATHS = _list("ALLOWED_PATHS")
     MAX_UPLOAD_SIZE = _int("MAX_UPLOAD_SIZE", 48)
     BLOCKED_EXTENSIONS = _list("BLOCKED_EXTENSIONS", ".exe,.bat,.ps1,.msi,.cmd,.vbs,.reg")
-    DOWNLOAD_PATH = os.getenv("DOWNLOAD_PATH", "C:/Users/Public/Downloads/CtrlRelay")
+    DOWNLOAD_PATH = _list("DOWNLOAD_PATH", "C:/Users/Public/Downloads/CtrlRelay")
     RUN_COMMAND_ENABLED = _bool("RUN_COMMAND_ENABLED", True)
     TYPE_ENABLED = _bool("TYPE_ENABLED", True)
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -41,9 +41,12 @@ def _int(key: str, default: int) -> int:
         return default
     
 def _list(key: str, default: str = "") -> list[str]:
-    raw = os.getenv(key, default)
-    return [x.strip() for x in raw.split(",") if x.strip()]
-
+    raw = os.getenv(key)
+    if raw is None:
+        raw = default          # env var not set → use default
+    elif '#' in raw:
+        raw = raw.split('#', 1)[0].strip()  # strip inline comments
+    return [x.strip() for x in raw.split(",") if x.strip()] if raw else []
 
 # Auth
 BOT_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
@@ -61,7 +64,7 @@ SCREENSHOT_QUALITY: int = _int("SCREENSHOT_QUALITY", 85)
 ALLOWED_PATHS: list[str] = _list("ALLOWED_PATHS")
 MAX_UPLOAD_SIZE: int = _int("MAX_UPLOAD_SIZE", 48)
 BLOCKED_EXTENSIONS: list[str] = _list("BLOCKED_EXTENSIONS", ".exe,.bat,.ps1,.msi,.cmd,.vbs,.reg")
-DOWNLOAD_PATH: str = os.getenv("DOWNLOAD_PATH", "C:/Users/Public/Downloads/CtrlRelay")
+DOWNLOAD_PATH: list[str] = _list("DOWNLOAD_PATH", "C:/Users/Public/Downloads/CtrlRelay")
  
 # Input
 RUN_COMMAND_ENABLED: bool = _bool("RUN_COMMAND_ENABLED", True)

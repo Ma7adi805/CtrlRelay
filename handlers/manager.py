@@ -1,4 +1,4 @@
-import subprocess, platform, asyncio, os, json
+import subprocess, platform, asyncio, os, json, psutil
 from time import time
 from core.auth import restricted, power
 import core.settings as settings_core
@@ -10,7 +10,7 @@ from html import escape
 from time import sleep as time_sleep
 from PIL import ImageGrab, Image
 import configs.launch.add_launch_shortcuts as launch_shortcuts
-from core.auth import processManagment
+from core.auth import processManagement
 import modules.audio as audio_module
 
 ASK_PATH = 1
@@ -53,7 +53,7 @@ def sysinfo() -> str:
 
 class ManagerHandler:
     @restricted
-    @processManagment
+    @processManagement
     async def screenshot(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Take a screenshot of the full desktop and send it to the user."""
         reload_settings() 
@@ -63,9 +63,7 @@ class ManagerHandler:
         if screenshot is None:
             await update.message.reply_text("Failed to take a screenshot.")
             return
-        screenshot_path = "screenshot.jpg"
-        if os.path.exists(screenshot_path):
-            screenshot_path = f"screenshot_{int(time())}.jpg"
+        screenshot_path = f"screenshot_{int(time())}.jpg"
         screenshot.save(
             screenshot_path,
             "JPEG",
@@ -80,14 +78,14 @@ class ManagerHandler:
         os.remove(screenshot_path)
 
     @restricted
-    @processManagment
+    @processManagement
     async def sysinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Send system information to the user."""
         info = sysinfo()
         await update.message.reply_text(f"<b>System Information:</b>\n\n{info}", parse_mode="HTML")
 
     @restricted
-    @processManagment
+    @processManagement
     async def launch_shortcut(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Launch an application using a specified shortcut."""
         shortcuts = launch_shortcuts.list_shortcuts()
@@ -104,7 +102,7 @@ class ManagerHandler:
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text("Select a shortcut to launch:", reply_markup=reply_markup)
     @restricted
-    @processManagment
+    @processManagement
     async def delete_shortcut(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Delete a launch shortcut."""
         shortcuts = launch_shortcuts.list_shortcuts()
@@ -122,7 +120,7 @@ class ManagerHandler:
         await update.message.reply_text("Select a shortcut to delete:", reply_markup=reply_markup)
     
     @restricted
-    @processManagment
+    @processManagement
     async def create_shortcut(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Create a new launch shortcut."""
         if len(context.args) < 1:
@@ -135,7 +133,7 @@ class ManagerHandler:
         return ASK_PATH
     
     @restricted
-    @processManagment
+    @processManagement
     async def create_shortcut2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Create a new launch shortcut. (Part 2: Receive the command/path)"""
         path = update.message.text
@@ -148,7 +146,7 @@ class ManagerHandler:
         return ConversationHandler.END
     
     @restricted
-    @processManagment
+    @processManagement
     async def setaudio(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Set the default audio output device."""
         audios = audio_module.get_clean_output_devices()
@@ -166,7 +164,7 @@ class ManagerHandler:
         await update.message.reply_text(f"Select an audio output device:\n<b>Current Audio Output:</b> {currentAudio[:60]}\n<b>Current Volume:</b> {current_volume}%", reply_markup=reply_markup, parse_mode="HTML")
     
     @restricted
-    @processManagment
+    @processManagement
     async def volume(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Set the system audio volume."""
         if len(context.args) < 1:
@@ -185,7 +183,60 @@ class ManagerHandler:
 
         result = audio_module.set_audio_volume(volume)
         await update.message.reply_text(result)
+    
+    @restricted
+    @processManagement
+    async def processes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """List running processes."""
 
+        procs = []
+        for proc in psutil.process_iter():
+            try:
+                procs.append(proc)
+                proc.cpu_percent()
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+
+        await asyncio.sleep(0.1)
+
+        processes = []
+        for proc in procs:
+            try:
+                processes.append({
+                    'pid': proc.pid,
+                    'name': proc.name()[:30],
+                    'cpu': proc.cpu_percent(),
+                    'mem': proc.memory_percent(),
+                })
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+
+        processes.sort(key=lambda p: p['cpu'], reverse=True)
+
+        lines = ["<b>Top Processes (by CPU):</b>\n"]
+        for p in processes[:15]:
+            lines.append(
+                f"<code>{p['pid']:>6}</code>  "
+                f"{p['cpu']:5.1f}%  "
+                f"{p['mem']:4.1f}%  "
+                f"{p['name']}"
+            )
+        lines.append(escape("\n/kill <pid> to terminate"))
+
+        await update.message.reply_text("\n".join(lines), parse_mode="HTML")
+    @restricted
+    @processManagement
+    async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if len(context.args) == 1:
+            pid = int(context.args[0])
+            proc = psutil.Process(pid)
+            name = proc.name()
+            proc.kill()
+            await update.message.reply_text(f"Killed process {pid} ({name})")
+            return
+        else:
+            await update.message.reply_text("Usage: /kill <pid>")
+        
     @restricted
     async def help_process_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Send a help message for process management commands."""
@@ -201,6 +252,8 @@ class ManagerHandler:
             f"{escape('/create_shortcut <name> - Create a new launch shortcut (you will be prompted for the command/path).')}\n"
             "/setaudio - Set the default audio output device. <i>(BETA)</i>\n"
             f"{escape('/volume <volume> - Set the system audio volume (1-100).')} <i>(BETA)</i>\n"
+            "/processes - List top processes by CPU usage.\n"
+            f"{escape('/kill <pid> - Terminate a process.')}\n"
         )
         disclaimer = (
             "\nDisclaimer: Process management commands are currently disabled in the .env file. "
@@ -219,6 +272,8 @@ def setup(app:Application):
     app.add_handler(CommandHandler("delete_shortcut", ManagerHandler.delete_shortcut))
     app.add_handler(CommandHandler("setaudio", ManagerHandler.setaudio))
     app.add_handler(CommandHandler("volume", ManagerHandler.volume))
+    app.add_handler(CommandHandler("processes", ManagerHandler.processes))
+    app.add_handler(CommandHandler("kill", ManagerHandler.kill))
     app.add_handler(
         ConversationHandler(
             entry_points=[CommandHandler("create_shortcut", ManagerHandler.create_shortcut)],

@@ -6,7 +6,6 @@ from core.settings import reload_settings
 from utils.logger import logger
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
-from time import sleep as time_sleep
 
 HibernationTask: asyncio.Task = None  
 
