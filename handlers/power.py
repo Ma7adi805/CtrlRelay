@@ -78,7 +78,7 @@ def restart():
         return False, False, error
     
     if not settings_core.VOID_POWER_TIMER:
-        logger.info(f"Restarting in {WAIT} seconds before")
+        logger.info(f"Restarting in {WAIT} seconds")
     
     try:
         if platform.system() == "Windows":
@@ -291,13 +291,11 @@ class PowerManagerCmd:
     @power
     async def hibernate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         success, supported, error = await hibernate(update)
-        global AbortHibernateFlag
         if not supported:
             await update.message.reply_text("❌ Unsupported operating system for hibernate.\nSupported OS: Windows, Linux.")
         elif success:
             await update.message.reply_text(f"System is hibernating in {settings_core.POWER_TIMER_WAIT} seconds.")
         elif not success:
-            AbortHibernateFlag = False
             await update.message.reply_text("Hibernation aborted.")
         else:
             await update.message.reply_text(f"❌ Failed to hibernate the system: \n{error if error else 'Unknown error'}")

@@ -1,13 +1,12 @@
-import subprocess, platform, asyncio, os, json, psutil
+import platform, asyncio, os, psutil
 from time import time
-from core.auth import restricted, power
+from core.auth import restricted
 import core.settings as settings_core
 from core.settings import reload_settings
 from utils.logger import logger
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ContextTypes, Application, ConversationHandler, MessageHandler, filters, CallbackQueryHandler
 from html import escape
-from time import sleep as time_sleep
 from PIL import ImageGrab, Image
 import configs.launch.add_launch_shortcuts as launch_shortcuts
 from core.auth import processManagement
@@ -141,6 +140,7 @@ class ManagerHandler:
         if not name or not path:
             await update.message.reply_text("Shortcut name or path is missing. Please start over.")
             return ConversationHandler.END
+        launch_shortcuts.setup_file()
         response = launch_shortcuts.add_shortcut(name, path)
         await update.message.reply_text(response)
         return ConversationHandler.END

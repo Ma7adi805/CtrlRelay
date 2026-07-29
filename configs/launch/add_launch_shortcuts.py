@@ -10,15 +10,17 @@ from utils.logger import logger
 
 LAUNCH_JSON_PATH = Path(__file__).resolve().with_name("launch.json")
 
-json_format_default = {
-    "launch_shortcuts": {}
-}
+def setup_file():
+    json_format_default = {
+        "launch_shortcuts": {}
+    }
 
-if not LAUNCH_JSON_PATH.exists():
-    print("Creating default launch.json configuration file...")
-    with LAUNCH_JSON_PATH.open("w", encoding="utf-8") as f:
-        json.dump(json_format_default, f, indent=4)
+    if not LAUNCH_JSON_PATH.exists():
+        print("Creating default launch.json configuration file...")
+        with LAUNCH_JSON_PATH.open("w", encoding="utf-8") as f:
+            json.dump(json_format_default, f, indent=4)
 
+setup_file()
 
 def get_id(id:int) -> str | None:
     """Get the shortcut name by its ID."""
@@ -204,14 +206,19 @@ def launch_shortcut_by_id(shortcut_id: int) -> str:
     name, command = get_shortcut_by_id(shortcut_id)
     if not name or not command:
         return f"Shortcut with ID '{shortcut_id}' does not exist."
-    
+
     is_valid, validation_message = is_valid_shortcut_cmd(command)
     if not is_valid:
         return validation_message
-    
+
     try:
-        exe_path, arguments = _resolve_launch_target(command)
-        subprocess.Popen([exe_path] + arguments, shell=(platform.system() == "Windows"))
+        if platform.system() == "Windows":
+            # On Windows with shell=True, pass the command as a single string
+            subprocess.Popen(command, shell=True)
+        else:
+            # On Unix-like systems, use the list approach
+            exe_path, arguments = _resolve_launch_target(command)
+            subprocess.Popen([exe_path] + arguments)
         logger.info(f"Launched shortcut '{name}' with command: {command}")
         return f"Shortcut '{name}' launched successfully."
     except Exception as e:
@@ -223,20 +230,29 @@ def launch_shortcut_by_name(name: str) -> str:
     try:
         with LAUNCH_JSON_PATH.open("r", encoding="utf-8") as f:
             data = json.load(f)
-        
+
         shortcut_data = data.get("launch_shortcuts", {}).get(name)
         if not shortcut_data:
             return f"Shortcut '{name}' does not exist."
-        
+
         command = shortcut_data.get("command")
         is_valid, validation_message = is_valid_shortcut_cmd(command)
         if not is_valid:
             return validation_message
-        
-        exe_path, arguments = _resolve_launch_target(command)
-        subprocess.Popen([exe_path] + arguments, shell=(platform.system() == "Windows"))
-        logger.info(f"Launched shortcut '{name}' with command: {command}")
-        return f"Shortcut '{name}' launched successfully."
+
+        try:
+            if platform.system() == "Windows":
+                # On Windows with shell=True, pass the command as a single string
+                subprocess.Popen(command, shell=True)
+            else:
+                # On Unix-like systems, use the list approach
+                exe_path, arguments = _resolve_launch_target(command)
+                subprocess.Popen([exe_path] + arguments)
+            logger.info(f"Launched shortcut '{name}' with command: {command}")
+            return f"Shortcut '{name}' launched successfully."
+        except Exception as e:
+            logger.error(f"Failed to launch shortcut '{name}': {e}")
+            return f"Failed to launch shortcut '{name}': {e}"
     except Exception as e:
         logger.error(f"Failed to launch shortcut '{name}': {e}")
         return f"Failed to launch shortcut '{name}': {e}"

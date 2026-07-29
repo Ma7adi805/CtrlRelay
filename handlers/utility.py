@@ -40,6 +40,7 @@ def is_path_allowed(path: str) -> bool:
     reload_settings()
     normalized_path = os.path.abspath(path)
     for allowed_path in settings_core.ALLOWED_PATHS:
+        allowed_path = allowed_path.strip().replace("%USERPROFILE%", os.path.expanduser("~"))
         if normalized_path.startswith(os.path.abspath(allowed_path)):
             return True
     logger.warning(f"Access denied for path: {normalized_path}")
@@ -50,6 +51,7 @@ def is_path_allowed_download(path: str) -> bool:
     reload_settings()
     normalized_path = os.path.abspath(path)
     for allowed_path in settings_core.DOWNLOAD_PATH:
+        allowed_path = allowed_path.strip().replace("%USERPROFILE%", os.path.expanduser("~"))
         if normalized_path.startswith(os.path.abspath(allowed_path)):
             return True
     logger.warning(f"Access denied for path: {normalized_path}")
@@ -102,6 +104,7 @@ class utilityCmd:
             return None
 
         for allowed_path in settings_core.ALLOWED_PATHS:
+            allowed_path = allowed_path.strip().replace("%USERPROFILE%", os.path.expanduser("~"))
             if os.path.exists(allowed_path):
                 path_token = uuid4().hex[:8]
                 path_map[path_token] = allowed_path
@@ -114,7 +117,16 @@ class utilityCmd:
             else:
                 logger.warning(f"Allowed path does not exist: {allowed_path}")
         for allowed_path in settings_core.DOWNLOAD_PATH:
-            if os.path.exists(allowed_path):
+            allowed_path = allowed_path.strip().replace("%USERPROFILE%", os.path.expanduser("~"))
+            if not os.path.exists(allowed_path):
+                logger.warning(f"Download path does not exist: {allowed_path}, Attempting to create it.")
+                try:
+                    os.makedirs(allowed_path)
+                    logger.info(f"Download path created: {allowed_path}")
+                except Exception as e:
+                    logger.error(f"Error creating download path {allowed_path}: {e}")
+                    return None
+            try:
                 path_token = uuid4().hex[:8]
                 path_map[path_token] = allowed_path
                 keyboard.append([
@@ -123,9 +135,10 @@ class utilityCmd:
                         callback_data=f"up:{file_token}:{path_token}"
                     )
                 ])
-            else:
-                logger.warning(f"Download path does not exist: {allowed_path}")
-
+                return InlineKeyboardMarkup(keyboard) if keyboard else None
+            except Exception as e:
+                logger.error(f"Error adding download path {allowed_path} to keyboard: {e}")
+                return None
 
         return InlineKeyboardMarkup(keyboard) if keyboard else None
     

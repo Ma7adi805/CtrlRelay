@@ -10,7 +10,7 @@ def restricted(func):
     """Decorator — blocks any user not in ALLOWED_CHAT_IDS."""
     @wraps(func)
     async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-        settings_core.reload_settings()  # Call the function instead of reload()
+        settings_core.reload_settings()
         user = update.effective_user
         chat_id = update.effective_chat.id
  

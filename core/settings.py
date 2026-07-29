@@ -1,17 +1,53 @@
 import os
 from dotenv import load_dotenv
-
 load_dotenv() 
 
+def setup_env():
+    if os.path.exists(".env"):
+        load_dotenv()
+    else:
+        # Create a default .env file if it doesn't exist
+        from utils.logger import logger
+        with open(".env", "w", encoding="utf-8") as f:
+            Format = r"""# CtrlRelay Configuration
+
+# --- Auth ---
+TELEGRAM_TOKEN= # Your Telegram bot token (Get it from @BotFather)
+ALLOWED_CHAT_IDS=   # Comma-separated Telegram chat IDs (e.g., 123456789,987654321) (Use /setup to get your chat ID)
+
+# --- Power Settings ---
+VOID_POWER_TIMER=true        # Show cancel window before shutdown/restart/sleep
+POWER_TIMER_WAIT=30       # Seconds to wait before executing power command
+POWER_MANAGEMENT=true      # Enable /processes, /kill, /launch, /setaudio
+# --- System ---
+PROCESS_MANAGEMENT=true      # Enable /processes, /kill, /launch, /setaudio
+SCREENSHOT_QUALITY=80    # JPEG quality 1-100
+
+# --- Files ---
+ALLOWED_PATHS=y   # Comma-separated, restricts /ls (ex.  C:\Users\[USER]\Downloads\,C:\Users\[USER]\Documents)
+MAX_UPLOAD_SIZE=48             # Max file size in MB (Telegram bot limit is 50MB)
+DOWNLOAD_PATH=%USERPROFILE%\Downloads\CtrlRelay  # Path for downloaded files (for /upload and /getfile commands). If empty, defaults to C:/Users/Public/Downloads/CtrlRelay
+
+# --- Input ---
+RUN_COMMAND_ENABLED=true     # Enable /run (shell command execution)
+TYPE_ENABLED=true            # Enable /type (remote keyboard input)
+
+# --- Logging  ---
+LOG_LEVEL=INFO               # DEBUG, INFO, ERROR
+LOG_FILE=ctrlrelay.log"""
+            f.write(Format)
+            del Format
+            logger.info("Created default .env file. Please configure it before running the bot.")
 
 def reload_settings():
     """Reload all settings from .env file"""
+    from utils.logger import logger
     load_dotenv(override=True)  # Force reload from .env
-    
+
     # Update module-level variables
     global BOT_TOKEN, ALLOWED_CHAT_IDS, VOID_POWER_TIMER, POWER_TIMER_WAIT, POWER_MANAGEMENT
     global PROCESS_MANAGEMENT, SCREENSHOT_QUALITY
-    global ALLOWED_PATHS, MAX_UPLOAD_SIZE, BLOCKED_EXTENSIONS, DOWNLOAD_PATH
+    global ALLOWED_PATHS, MAX_UPLOAD_SIZE, DOWNLOAD_PATH
     global RUN_COMMAND_ENABLED, TYPE_ENABLED, LOG_LEVEL, LOG_FILE
 
     BOT_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
@@ -23,8 +59,7 @@ def reload_settings():
     SCREENSHOT_QUALITY = _int("SCREENSHOT_QUALITY", 85)
     ALLOWED_PATHS = _list("ALLOWED_PATHS")
     MAX_UPLOAD_SIZE = _int("MAX_UPLOAD_SIZE", 48)
-    BLOCKED_EXTENSIONS = _list("BLOCKED_EXTENSIONS", ".exe,.bat,.ps1,.msi,.cmd,.vbs,.reg")
-    DOWNLOAD_PATH = _list("DOWNLOAD_PATH", "C:/Users/Public/Downloads/CtrlRelay")
+    DOWNLOAD_PATH = _list("DOWNLOAD_PATH", r"%USERPROFILE%\Downloads\CtrlRelay")
     RUN_COMMAND_ENABLED = _bool("RUN_COMMAND_ENABLED", True)
     TYPE_ENABLED = _bool("TYPE_ENABLED", True)
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -63,8 +98,7 @@ SCREENSHOT_QUALITY: int = _int("SCREENSHOT_QUALITY", 85)
 # Files
 ALLOWED_PATHS: list[str] = _list("ALLOWED_PATHS")
 MAX_UPLOAD_SIZE: int = _int("MAX_UPLOAD_SIZE", 48)
-BLOCKED_EXTENSIONS: list[str] = _list("BLOCKED_EXTENSIONS", ".exe,.bat,.ps1,.msi,.cmd,.vbs,.reg")
-DOWNLOAD_PATH: list[str] = _list("DOWNLOAD_PATH", "C:/Users/Public/Downloads/CtrlRelay")
+DOWNLOAD_PATH: list[str] = _list("DOWNLOAD_PATH", r"%USERPROFILE%\Downloads\CtrlRelay")
  
 # Input
 RUN_COMMAND_ENABLED: bool = _bool("RUN_COMMAND_ENABLED", True)

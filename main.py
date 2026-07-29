@@ -1,15 +1,12 @@
 ##-----Libraries-----##
-from tracemalloc import start
-from flask import app
-from telegram import Update, BotCommand, InlineKeyboardButton, InlineKeyboardMarkup
+import asyncio
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, Application
 from telegram.constants import ParseMode
+from telegram.error import InvalidToken, NetworkError, TelegramError
 from core.auth import restricted
-from handlers.manager import ManagerHandler
 from utils.logger import logger
-from core.settings import BOT_TOKEN
-import handlers.power as power
-from handlers.power import PowerManagerCmd
+from core.settings import BOT_TOKEN, setup_env
 import configs.launch.add_launch_shortcuts as launch_shortcuts
 import handlers, importlib, pkgutil
 import modules.audio as audio_module
@@ -98,28 +95,88 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("Power Commands", callback_data="help_power"), InlineKeyboardButton("Management Commands", callback_data="help_process"), InlineKeyboardButton("Utility Commands", callback_data="help_utility")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("What help do you need with?", reply_markup=reply_markup)
-    
+    await update.message.reply_text("Select a category to view available commands:", reply_markup=reply_markup)
 
-async def on_ready(application: ApplicationBuilder):
-    logger.info(f"Bot is ready and running as: {application.bot.username}.")
+
+async def validate_bot(application: ApplicationBuilder):
+    try:
+        me = await application.bot.get_me()
+        return "Connected"
+
+    except InvalidToken:
+        #logger.error("Invalid bot token.")
+        return "Invalid"
+
+    except NetworkError as e:
+        #logger.error(f"Network error: {e}")
+        return "NetworkError"
+
+    except TelegramError as e:
+        #logger.error(f"Telegram API error: {e}")
+        return "TelegramError"
+
+async def on_ready(application: Application):
+    status = await validate_bot(application)
+    if status == "Connected":
+        logger.info(f"Bot is ready and running as: {application.bot.username}.")
+    elif status == "Invalid":
+        logger.error("Bot token is invalid. Please check your .env file.")
+    elif status == "NetworkError":
+        logger.error("Network error occurred while connecting to Telegram API.")
+    elif status == "TelegramError":
+        logger.error("An error occurred with the Telegram API.")
+
+async def check_token(token: str) -> bool:
+    """Validate token directly with the Telegram API."""
+    try:
+        async with Bot(token) as bot:
+            me = await bot.get_me()
+            logger.info(f"Connected successfully as @{me.username}")
+            return True
+    except InvalidToken:
+        logger.error("❌ Invalid bot token provided in environment variables.")
+        return False
+    except NetworkError as e:
+        logger.error(f"❌ Network error while validating token: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Failed to connect: {e}")
+        return False
 
 
 
 
 def main():
+    setup_env()
     TOKEN = BOT_TOKEN
-    if not TOKEN:
-        logger.error("TELEGRAM_TOKEN is not set in the environment variables.")
+    if not TOKEN or TOKEN.strip() == "YOUR_TELEGRAM_BOT_TOKEN":
+        logger.error("TELEGRAM_TOKEN is missing or not set.")
         return
     
+    # 1. Run the token check first
+    is_valid = asyncio.run(check_token(TOKEN))
+    
+    # 2. Stop execution explicitly if validation fails
+    if not is_valid:
+        logger.error("Aborting startup due to invalid credentials.")
+        return
+
+    # 3. Only proceed with application setup if token is verified
     app = ApplicationBuilder().token(TOKEN).post_init(on_ready).build()
+    del TOKEN
+
     setup_handlers(app)
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CallbackQueryHandler(onButtonClick))
+    
     app.add_error_handler(error_handler)
-    app.run_polling()
+
+    try:
+        logger.info("Starting bot polling...")
+        app.run_polling()
+    except KeyboardInterrupt:
+        logger.info("Bot stopped by user.")
 
 if __name__ == "__main__":
     main()
