@@ -3,7 +3,7 @@ from time import time
 from core.auth import restricted
 import core.settings as settings_core
 from core.settings import reload_settings
-from utils.logger import logger
+from bot_utils.logger import logger
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ContextTypes, Application, ConversationHandler, MessageHandler, filters, CallbackQueryHandler
 from html import escape
@@ -249,7 +249,7 @@ class ManagerHandler:
             "/sysinfo - Get system information.\n"
             "/launch_shortcut - Launch an application using a configured shortcut.\n"
             "/delete_shortcut - Delete a configured launch shortcut.\n"
-            f"{escape('/create_shortcut <name> - Create a new launch shortcut (you will be prompted for the command/path).')}\n"
+            f"{escape('/create_shortcut <name> - Create a new launch shortcut (you will be prompted for the command/path).')} <i>(BETA)</i>\n"
             "/setaudio - Set the default audio output device. <i>(BETA)</i>\n"
             f"{escape('/volume <volume> - Set the system audio volume (1-100).')} <i>(BETA)</i>\n"
             "/processes - List top processes by CPU usage.\n"

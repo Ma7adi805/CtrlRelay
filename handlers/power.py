@@ -3,7 +3,7 @@ from time import time
 from core.auth import restricted, power
 import core.settings as settings_core
 from core.settings import reload_settings
-from utils.logger import logger
+from bot_utils.logger import logger
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 

@@ -7,29 +7,32 @@ def setup_env():
         load_dotenv()
     else:
         # Create a default .env file if it doesn't exist
-        from utils.logger import logger
+        from bot_utils.logger import logger
         with open(".env", "w", encoding="utf-8") as f:
-            Format = r"""# CtrlRelay Configuration
+            Format = r"""# CtrlRelay Configuration Template
+# Copy this file to .env and fill in your values
 
 # --- Auth ---
-TELEGRAM_TOKEN= # Your Telegram bot token (Get it from @BotFather)
-ALLOWED_CHAT_IDS=   # Comma-separated Telegram chat IDs (e.g., 123456789,987654321) (Use /setup to get your chat ID)
+TELEGRAM_TOKEN=your_telegram_bot_token_here  # Get from @BotFather
+ALLOWED_CHAT_IDS=your_telegram_chat_id_here  # Comma-separated, get from /start command
 
 # --- Power Settings ---
 VOID_POWER_TIMER=true        # Show cancel window before shutdown/restart/sleep
-POWER_TIMER_WAIT=30       # Seconds to wait before executing power command
+POWER_TIMER_WAIT=30        # Seconds to wait before executing power command
 POWER_MANAGEMENT=true      # Enable /processes, /kill, /launch, /setaudio
+
 # --- System ---
 PROCESS_MANAGEMENT=true      # Enable /processes, /kill, /launch, /setaudio
-SCREENSHOT_QUALITY=80    # JPEG quality 1-100
+SCREENSHOT_QUALITY=85    # JPEG quality 1-100
 
 # --- Files ---
-ALLOWED_PATHS=y   # Comma-separated, restricts /ls (ex.  C:\Users\[USER]\Downloads\,C:\Users\[USER]\Documents)
+ALLOWED_PATHS=   # Comma-separated paths for /ls command (e.g. C:\Users\USERNAME\Downloads\,C:\Users\USERNAME\Documents)
 MAX_UPLOAD_SIZE=48             # Max file size in MB (Telegram bot limit is 50MB)
+BLOCKED_EXTENSIONS= # Comma-separated file extensions to block (e.g. .exe,.bat,.cmd)
 DOWNLOAD_PATH=%USERPROFILE%\Downloads\CtrlRelay  # Path for downloaded files (for /upload and /getfile commands). If empty, defaults to C:/Users/Public/Downloads/CtrlRelay
 
 # --- Input ---
-RUN_COMMAND_ENABLED=true     # Enable /run (shell command execution)
+RUN_COMMAND_ENABLED=false     # Enable /run (shell command execution) - SECURITY RISK: Set to true only if needed and understood
 TYPE_ENABLED=true            # Enable /type (remote keyboard input)
 
 # --- Logging  ---
@@ -41,7 +44,7 @@ LOG_FILE=ctrlrelay.log"""
 
 def reload_settings():
     """Reload all settings from .env file"""
-    from utils.logger import logger
+    from bot_utils.logger import logger
     load_dotenv(override=True)  # Force reload from .env
 
     # Update module-level variables
@@ -59,6 +62,7 @@ def reload_settings():
     SCREENSHOT_QUALITY = _int("SCREENSHOT_QUALITY", 85)
     ALLOWED_PATHS = _list("ALLOWED_PATHS")
     MAX_UPLOAD_SIZE = _int("MAX_UPLOAD_SIZE", 48)
+    BLOCKED_EXTENSIONS = _list("BLOCKED_EXTENSIONS")
     DOWNLOAD_PATH = _list("DOWNLOAD_PATH", r"%USERPROFILE%\Downloads\CtrlRelay")
     RUN_COMMAND_ENABLED = _bool("RUN_COMMAND_ENABLED", True)
     TYPE_ENABLED = _bool("TYPE_ENABLED", True)
@@ -98,6 +102,7 @@ SCREENSHOT_QUALITY: int = _int("SCREENSHOT_QUALITY", 85)
 # Files
 ALLOWED_PATHS: list[str] = _list("ALLOWED_PATHS")
 MAX_UPLOAD_SIZE: int = _int("MAX_UPLOAD_SIZE", 48)
+BLOCKED_EXTENSIONS: list[str] = _list("BLOCKED_EXTENSIONS")
 DOWNLOAD_PATH: list[str] = _list("DOWNLOAD_PATH", r"%USERPROFILE%\Downloads\CtrlRelay")
  
 # Input

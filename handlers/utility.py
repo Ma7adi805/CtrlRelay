@@ -5,7 +5,7 @@ from html import escape
 from core.auth import restricted, typeManagement, runCommand
 import core.settings as settings_core
 from core.settings import reload_settings
-from utils.logger import logger
+from bot_utils.logger import logger
 from telegram import InlineKeyboardMarkup, Update, InlineKeyboardButton, Document, PhotoSize
 from telegram.ext import CommandHandler, ContextTypes, Application, ConversationHandler, MessageHandler, filters, CallbackQueryHandler
 from modules import files as files_module
@@ -276,7 +276,7 @@ class utilityCmd:
         logger.debug(f"ALLOWED_PATHS: {settings_core.ALLOWED_PATHS}, DOWNLOAD_PATH: {settings_core.DOWNLOAD_PATH}")
         keyboard=[]
         for allowed_path in settings_core.ALLOWED_PATHS:
-            allowed_path_cropped, valid = files_module.crop_file_path(allowed_path)
+            allowed_path_cropped, valid = files_module.crop_file_path(allowed_path.replace("%USERPROFILE%", os.path.expanduser("~")))
             logger.debug(f"Allowed path: {allowed_path}, Cropped: {allowed_path_cropped}, Valid: {valid}")
             if valid:
                 keyboard.append([InlineKeyboardButton(allowed_path_cropped, callback_data=f"ls:{allowed_path_cropped}")])
@@ -284,7 +284,7 @@ class utilityCmd:
                 logger.warning(f"Allowed path is not valid: {allowed_path} (cropped: {allowed_path_cropped})")
                 
         for allowed_path in settings_core.DOWNLOAD_PATH:
-            allowed_path_cropped, valid = files_module.crop_file_path(allowed_path)
+            allowed_path_cropped, valid = files_module.crop_file_path(allowed_path.replace("%USERPROFILE%", os.path.expanduser("~")))
             logger.debug(f"Download path: {allowed_path}, Cropped: {allowed_path_cropped}, Valid: {valid}")
             if valid:
                 keyboard.append([InlineKeyboardButton(allowed_path_cropped, callback_data=f"ls:{allowed_path_cropped}")])

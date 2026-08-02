@@ -1,9 +1,2 @@
 @echo off
-echo Setting up CtrlRelay...
-pip install -r requirements.txt
-echo.
-echo Setup complete! Next steps:
-echo 1. Edit .env file with your Telegram bot token and allowed chat IDs
-echo 2. Configure launch shortcuts in configs/launch/launch.json (optional)
-echo 3. Run main.py to start the bot
-pause
+pyinstaller --onefile --add-data ".env;." --add-data "configs/launch/launch.json;configs/launch" --add-data "requirements.txt;." --hidden-import=win32timezone --hidden-import=pkgutil --hidden-import=handlers.manager --hidden-import=handlers.power --hidden-import=handlers.utility --exclude-module PyQt5 --exclude-module PySide6 --collect-all handlers --collect-all modules --collect-all bot_utils main.py

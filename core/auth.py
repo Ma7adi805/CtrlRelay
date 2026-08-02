@@ -2,7 +2,7 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import ContextTypes
 import core.settings as settings_core
-from utils.logger import logger
+from bot_utils.logger import logger
 from telegram.constants import ParseMode
 
 

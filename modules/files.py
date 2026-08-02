@@ -12,10 +12,12 @@ def _isvalid_path(path: str) -> bool:
     
     norm_path = os.path.normpath(path)
     for allowed_path in settings.ALLOWED_PATHS:
+        allowed_path = allowed_path.replace("%USERPROFILE%", os.path.expanduser("~"))
         norm_allowed = os.path.normpath(allowed_path)
         if norm_path.startswith(norm_allowed):
             return True
     for allowed_path in settings.DOWNLOAD_PATH:
+        allowed_path = allowed_path.replace("%USERPROFILE%", os.path.expanduser("~"))
         norm_allowed = os.path.normpath(allowed_path)
         if norm_path.startswith(norm_allowed):
             return True
@@ -41,6 +43,7 @@ def uncrop_file_path(cropped_path: str) -> tuple[str, bool]:
     cropped_segments = cropped_normalized.split("\\")
 
     for allowed_path in settings.ALLOWED_PATHS + settings.DOWNLOAD_PATH:
+        allowed_path = allowed_path.replace("%USERPROFILE%", os.path.expanduser("~"))
         allowed_normalized = allowed_path.replace("/", "\\")
         allowed_segments = allowed_normalized.split("\\")
         # Check if cropped is a suffix of this allowed path

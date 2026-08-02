@@ -1,25 +1,47 @@
 ##-----Libraries-----##
-import asyncio
+import asyncio, os
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, Application
 from telegram.constants import ParseMode
 from telegram.error import InvalidToken, NetworkError, TelegramError
 from core.auth import restricted
-from utils.logger import logger
+from bot_utils.logger import logger
 from core.settings import BOT_TOKEN, setup_env
 import configs.launch.add_launch_shortcuts as launch_shortcuts
 import handlers, importlib, pkgutil
 import modules.audio as audio_module
 from modules import files as files_module
+
+import sys
 #-----Setup-----##
 
-def setup_handlers(app:Application):
-    """Set up all command handlers for the bot."""
+
+"""
+def setup_handlers(app: Application):
+    #\"""Set up all command handlers for the bot.\"""
     for _, module_name, _ in pkgutil.walk_packages(handlers.__path__, prefix="handlers."):
         module = importlib.import_module(module_name)
         if hasattr(module, "setup") and callable(module.setup):
             logger.info(f"Running {module_name}.setup()")
-            module.setup(app)
+            module.setup(app)"""
+
+def setup_handlers(app: Application):
+    """Set up all command handlers for the bot (PyInstaller-compatible)."""
+    logger.info("Scanning for command handlers...")
+
+    # pkgutil.iter_modules works with PyInstaller's frozen PYZ archive
+    for _, module_name, is_pkg in pkgutil.iter_modules(handlers.__path__, prefix=f"{handlers.__name__}."):
+        logger.info(f"Discovered module: {module_name}")
+        try:
+            module = importlib.import_module(module_name)
+            if hasattr(module, "setup") and callable(module.setup):
+                logger.info(f"Running {module_name}.setup()")
+                module.setup(app)
+            else:
+                logger.warning(f"Module {module_name} has no callable setup() function.")
+        except Exception as e:
+            logger.error(f"Failed to import or setup {module_name}: {e}")          
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -66,7 +88,9 @@ async def onButtonClick(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data.startswith("ls:"):
         shortcut_path = get_shortcut_id(query.data)
         if shortcut_path is not None:
+            shortcut_path = shortcut_path.replace(os.path.expanduser("~"),"%USERPROFILE%")
             full_path, is_valid = files_module.uncrop_file_path(shortcut_path)
+            full_path = full_path.replace("%USERPROFILE%", os.path.expanduser("~"))
             logger.debug(f"Uncropped path: {full_path}, Valid: {is_valid}, Cropped: {shortcut_path}")
             if is_valid:
                 list_contents, error = files_module.list_directory_contents(full_path)

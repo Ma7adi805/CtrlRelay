@@ -6,7 +6,7 @@ if __package__ in (None, ""):
 
 from core.settings import reload_settings
 import core.settings as settings_core
-from utils.logger import logger
+from bot_utils.logger import logger
 
 LAUNCH_JSON_PATH = Path(__file__).resolve().with_name("launch.json")
 
