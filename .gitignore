@@ -1,0 +1,47 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# CtrlRelay specific
+ctrlrelay.log
+downloads/
+
+# Json files
+*.json
+
+# Temporary files
+TEMP
+EXE_CONVERSION_GUIDE.md
+ISSUES_AND_FIXES.md
+setup.bat
+CtrlRelay.spec
+logo_generation_prompt.md
