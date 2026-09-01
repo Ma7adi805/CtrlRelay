@@ -1,20 +1,26 @@
 ##-----Libraries-----##
-import asyncio, os
+import asyncio, os, time, sys
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, Application
 from telegram.constants import ParseMode
 from telegram.error import InvalidToken, NetworkError, TelegramError
 from core.auth import restricted
 from bot_utils.logger import logger
-from core.settings import BOT_TOKEN, setup_env
+from core.settings import setup_env, reload_settings
+from core import settings as settings_module
 import configs.launch.add_launch_shortcuts as launch_shortcuts
 import handlers, importlib, pkgutil
 import modules.audio as audio_module
 from modules import files as files_module
+import tray as CtrlTray
+from tray import Status, Action
+import threading
 
-import sys
 #-----Setup-----##
 
+_bot_loop = None
+_bot_thread = None
+_app_instance = None
 
 """
 def setup_handlers(app: Application):
@@ -48,9 +54,65 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"This is your chat ID: *{chat_id}*\n\nPlease add this ID to the ALLOWED\\_CHAT\\_IDS in the \\.env file to allow access\\.", parse_mode=ParseMode.MARKDOWN_V2)
 
 
+def build_application():
+    reload_settings()
+    app = ApplicationBuilder().token(settings_module.BOT_TOKEN).post_init(on_ready).build()
+    setup_handlers(app)
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CallbackQueryHandler(onButtonClick))
+    app.add_error_handler(error_handler)
+    return app
+
+def _run_bot_event_loop():
+    global _bot_loop, _app_instance
+    _bot_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(_bot_loop)
+
+    _app_instance = build_application()
+
+    async def runner():
+        await _app_instance.initialize()
+        await _app_instance.start()
+        await _app_instance.updater.start_polling()
+
+    _bot_loop.run_until_complete(runner())
+    _bot_loop.run_forever()
 
 
+async def _stop_bot_async():
+    global _app_instance
+    if _app_instance and _app_instance.updater and _app_instance.updater.running:
+        await _app_instance.updater.stop()
+        await _app_instance.stop()
+        await _app_instance.shutdown()
 
+def stop_bot_sync():
+    global _bot_loop, _bot_thread, _app_instance
+    if _bot_loop and _bot_loop.is_running():
+        future = asyncio.run_coroutine_threadsafe(_stop_bot_async(), _bot_loop)
+        future.result(timeout=10)
+        _bot_loop.call_soon_threadsafe(_bot_loop.stop)
+    
+    if _bot_thread and _bot_thread.is_alive():
+        _bot_thread.join(timeout=5)
+
+    _app_instance = None
+    _bot_loop = None
+    _bot_thread = None
+    CtrlTray.update_status(Status.STOPPED)
+
+def start_bot_sync():
+    global _bot_thread
+    if _bot_thread is not None and _bot_thread.is_alive():
+        return
+    
+    CtrlTray.update_status(Status.STARTING)
+    _bot_thread = threading.Thread(target=_run_bot_event_loop, name="telegram-poller", daemon=True)
+    _bot_thread.start()
+    
+    # Update status to RUNNING once the thread has launched
+    CtrlTray.update_status(Status.RUNNING)
 def get_shortcut_id(button_data: str) -> int | str | None:
     """Extract the shortcut ID from the button data."""
     try:
@@ -113,6 +175,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     logger.exception("Update caused error", exc_info=context.error)
 
 
+
 @restricted
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
@@ -143,12 +206,17 @@ async def on_ready(application: Application):
     status = await validate_bot(application)
     if status == "Connected":
         logger.info(f"Bot is ready and running as: {application.bot.username}.")
-    elif status == "Invalid":
-        logger.error("Bot token is invalid. Please check your .env file.")
-    elif status == "NetworkError":
-        logger.error("Network error occurred while connecting to Telegram API.")
-    elif status == "TelegramError":
-        logger.error("An error occurred with the Telegram API.")
+    else:
+        logger.error(f"Bot failed startup validation status: {status}")
+        CtrlTray.update_status(Status.ERROR)
+
+
+
+TOKEN = settings_module.BOT_TOKEN
+app = ApplicationBuilder().token(TOKEN).post_init(on_ready).build()
+del TOKEN
+
+
 
 async def check_token(token: str) -> bool:
     """Validate token directly with the Telegram API."""
@@ -167,40 +235,56 @@ async def check_token(token: str) -> bool:
         logger.error(f"❌ Failed to connect: {e}")
         return False
 
+_bot_running_flag = threading.Event()
 
 
+
+
+
+
+
+def _is_bot_running() -> bool:
+    return _bot_running_flag.is_set()
+
+@CtrlTray.onPowerEvent
+def handle_power_event(action: Action):
+    logger.info(f"Power event received: {action.value}")
+    reload_settings()
+
+    if action == Action.START:
+        start_bot_sync()
+
+    elif action == Action.STOP:
+        logger.info("Stopping bot...")
+        CtrlTray.update_status(Status.STOPPING)
+        stop_bot_sync()
+        logger.info("Bot stopped.")
+
+    elif action == Action.RESTART:
+        logger.info("Restarting bot...")
+        CtrlTray.update_status(Status.STOPPING)
+        stop_bot_sync()
+        time.sleep(1)
+        start_bot_sync()
+        logger.info("Bot restarted successfully.")
+
+@CtrlTray.onQuit
+def handle_quit():
+    CtrlTray.update_status(Status.STOPPING)
+    logger.info("Quit event received. Stopping bot and exiting...")
+    stop_bot_sync()
+    CtrlTray._icon.stop()
+    sys.exit(0)
 
 def main():
     setup_env()
-    TOKEN = BOT_TOKEN
-    if not TOKEN or TOKEN.strip() == "YOUR_TELEGRAM_BOT_TOKEN":
+    if not settings_module.BOT_TOKEN or settings_module.BOT_TOKEN.strip().lower() in ("your_telegram_bot_token_here", ""):
         logger.error("TELEGRAM_TOKEN is missing or not set.")
         return
-    
-    # 1. Run the token check first
-    is_valid = asyncio.run(check_token(TOKEN))
-    
-    # 2. Stop execution explicitly if validation fails
-    if not is_valid:
-        logger.error("Aborting startup due to invalid credentials.")
-        return
 
-    # 3. Only proceed with application setup if token is verified
-    app = ApplicationBuilder().token(TOKEN).post_init(on_ready).build()
-    del TOKEN
+    start_bot_sync()
+    CtrlTray.run()
 
-    setup_handlers(app)
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CallbackQueryHandler(onButtonClick))
-    
-    app.add_error_handler(error_handler)
-
-    try:
-        logger.info("Starting bot polling...")
-        app.run_polling()
-    except KeyboardInterrupt:
-        logger.info("Bot stopped by user.")
 
 if __name__ == "__main__":
     main()
