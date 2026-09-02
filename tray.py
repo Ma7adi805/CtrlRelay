@@ -1,13 +1,22 @@
-import threading, os, pystray, asyncio, inspect
+import threading, os, pystray, asyncio, inspect, sys
 from enum import Enum
-from PIL import Image, ImageDraw
+from PIL import Image
 
-DEFAULT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CtrlRelay.log")
-ENV = DEFAULT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+#DEFAULT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CtrlRelay.log")
+#ENV = DEFAULT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 
 iconsdir = os.path.join(basedir, "icons")
+
+
+def _get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+ENV = os.path.join(_get_base_dir(), ".env")
+DEFAULT_LOG_FILE = os.path.join(_get_base_dir(), "CtrlRelay.log")
 
 class TrayIcons(Enum):
     STARTING = Image.open(iconsdir + "/Starting.png")
@@ -128,5 +137,5 @@ def _build_menu():
 
 def run():
     global _icon
-    _icon = pystray.Icon("CtrlRelay", menu=_build_menu(), icon=TrayIcons.STOPPED.value)
+    _icon = pystray.Icon("CtrlRelay", menu=_build_menu(), icon=TrayIcons[_current_status.name].value)
     _icon.run()

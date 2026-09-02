@@ -54,8 +54,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"This is your chat ID: *{chat_id}*\n\nPlease add this ID to the ALLOWED\\_CHAT\\_IDS in the \\.env file to allow access\\.", parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def build_application():
+async def build_application():
     reload_settings()
+    if not await check_token(settings_module.BOT_TOKEN):
+        logger.error("Invalid bot token., please check your .env configuration and restart the application.")
+        return None
     app = ApplicationBuilder().token(settings_module.BOT_TOKEN).post_init(on_ready).build()
     setup_handlers(app)
     app.add_handler(CommandHandler("start", start))
@@ -69,9 +72,11 @@ def _run_bot_event_loop():
     _bot_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(_bot_loop)
 
-    _app_instance = build_application()
-
     async def runner():
+        global _app_instance
+        _app_instance = await build_application()
+        if _app_instance is None:
+            return
         await _app_instance.initialize()
         await _app_instance.start()
         await _app_instance.updater.start_polling()
@@ -106,11 +111,14 @@ def start_bot_sync():
     global _bot_thread
     if _bot_thread is not None and _bot_thread.is_alive():
         return
-    
+    if not settings_module.BOT_TOKEN or settings_module.BOT_TOKEN.strip().lower() in ("your_telegram_bot_token_here", ""):
+        logger.error("TELEGRAM_TOKEN is missing or not set. Please check your .env configuration.")
+        CtrlTray.update_status(Status.ERROR)
+        return
     CtrlTray.update_status(Status.STARTING)
-    _bot_thread = threading.Thread(target=_run_bot_event_loop, name="telegram-poller", daemon=True)
-    _bot_thread.start()
-    
+    bot_thread = threading.Thread(target=_run_bot_event_loop, name="telegram-poller", daemon=True)
+    bot_thread.start()
+
     # Update status to RUNNING once the thread has launched
     CtrlTray.update_status(Status.RUNNING)
 def get_shortcut_id(button_data: str) -> int | str | None:
@@ -210,14 +218,6 @@ async def on_ready(application: Application):
         logger.error(f"Bot failed startup validation status: {status}")
         CtrlTray.update_status(Status.ERROR)
 
-
-
-TOKEN = settings_module.BOT_TOKEN
-app = ApplicationBuilder().token(TOKEN).post_init(on_ready).build()
-del TOKEN
-
-
-
 async def check_token(token: str) -> bool:
     """Validate token directly with the Telegram API."""
     try:
@@ -280,11 +280,25 @@ def main():
     setup_env()
     if not settings_module.BOT_TOKEN or settings_module.BOT_TOKEN.strip().lower() in ("your_telegram_bot_token_here", ""):
         logger.error("TELEGRAM_TOKEN is missing or not set.")
-        return
-
-    start_bot_sync()
+        CtrlTray.update_status(Status.ERROR)
+    else:
+        start_bot_sync()
     CtrlTray.run()
 
 
 if __name__ == "__main__":
     main()
+
+
+#todo: fix InvalidToken bug
+"""
+[2026-09-02 15:14:40] [INFO] Created default .env file. Please configure it before running the bot.
+[2026-09-02 15:14:40] [ERROR] TELEGRAM_TOKEN is missing or not set.
+"""
+
+
+
+
+
+
+
