@@ -6,6 +6,8 @@ A lightweight Windows utility that lets you control your PC remotely through a T
 
 [![Pre-release](https://img.shields.io/badge/release-pre--release-yellow)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
 
+<video src="CtrlRelayPromo.mp4" controls width="800"></video>
+
 ## Features
 
 1. Control your PC remotely via Telegram

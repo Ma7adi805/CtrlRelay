@@ -45,3 +45,7 @@ ISSUES_AND_FIXES.md
 setup.bat
 CtrlRelay.spec
 logo_generation_prompt.md
+
+# AI
+.claude/
+.agents/
