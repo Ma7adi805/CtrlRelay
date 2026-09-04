@@ -5,6 +5,7 @@
 A lightweight Windows utility that lets you control your PC remotely through a Telegram bot.
 
 [![Pre-release](https://img.shields.io/badge/release-pre--release-yellow)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
 https://github.com/user-attachments/assets/1226e185-2786-4c5a-849f-360b6e027cbc
 
@@ -55,4 +56,4 @@ For questions, issues, or contributions, visit the [issue tracker](https://githu
 
 ## License
 
-This project is currently in pre-release. License details will be provided in an upcoming release.
+This project is licensed under the [GNU General Public License v3 (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html).
