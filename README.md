@@ -5,6 +5,9 @@
 A lightweight Windows utility that lets you control your PC remotely through a Telegram bot.
 
 [![Pre-release](https://img.shields.io/badge/release-pre--release-yellow)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+
+https://github.com/user-attachments/assets/1226e185-2786-4c5a-849f-360b6e027cbc
 
 ## Features
 
@@ -18,14 +21,14 @@ A lightweight Windows utility that lets you control your PC remotely through a T
 
 CtrlRelay runs entirely from the system tray, no terminal window needed. Once launched, an icon appears in your taskbar notification area where you can manage the bot at any time.
 
-| Menu Item | Description |
-|-----------|-------------|
-| Status | Shows the current state: Starting, Running, Stopping, Stopped, or Error. When in an error state, clicking it opens the log file. |
-| Start | Starts the Telegram bot. Available when the bot is stopped or in an error state. |
-| Restart | Restarts the bot. Available while it is running. |
-| Stop | Gracefully stops the bot. |
-| Open .env | Opens your configuration file in the default text editor. |
-| Quit | Stops the bot and exits the application. |
+| Menu Item | Description                                                                                                                      |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Status    | Shows the current state: Starting, Running, Stopping, Stopped, or Error. When in an error state, clicking it opens the log file. |
+| Start     | Starts the Telegram bot. Available when the bot is stopped or in an error state.                                                 |
+| Restart   | Restarts the bot. Available while it is running.                                                                                 |
+| Stop      | Gracefully stops the bot.                                                                                                        |
+| Open .env | Opens your configuration file in the default text editor.                                                                        |
+| Quit      | Stops the bot and exits the application.                                                                                         |
 
 Buttons are automatically enabled or disabled based on the current state, so you always know what actions are available.
 
@@ -40,12 +43,12 @@ Buttons are automatically enabled or disabled based on the current state, so you
 
 ## Technologies Used
 
-| Library | Purpose |
-|---------|---------|
-| Python | Core language |
+| Library             | Purpose                      |
+| ------------------- | ---------------------------- |
+| Python              | Core language                |
 | python-telegram-bot | Telegram bot API integration |
-| pystray | System tray icon and menu |
-| Pillow | Tray icon rendering |
+| pystray             | System tray icon and menu    |
+| Pillow              | Tray icon rendering          |
 
 ## Contact
 
@@ -53,4 +56,4 @@ For questions, issues, or contributions, visit the [issue tracker](https://githu
 
 ## License
 
-This project is currently in pre-release. License details will be provided in an upcoming release.
+This project is licensed under the [GNU General Public License v3 (GPLv3)](https://www.gnu.org/licenses/gpl-3.0.html).
