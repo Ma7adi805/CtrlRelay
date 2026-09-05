@@ -4,7 +4,7 @@
 
 A lightweight Windows utility that lets you control your PC remotely through a Telegram bot.
 
-[![Pre-release](https://img.shields.io/badge/release-pre--release-yellow)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
+[![Release](https://img.shields.io/badge/release-v1.0.0-green)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
 https://github.com/user-attachments/assets/1226e185-2786-4c5a-849f-360b6e027cbc
@@ -40,6 +40,14 @@ Buttons are automatically enabled or disabled based on the current state, so you
 4. Open the `.env` file. You can find it in the same folder as the executable, or open it directly from the tray menu using **Open .env**.
 5. Fill in your Telegram bot token and allowed chat ID, then save the file. To get your chat ID, send `/start` to your bot in Telegram first.
 6. Press **Restart** in the tray menu. The bot will reload your settings and start running.
+
+## Uninstalling
+
+When you uninstall CtrlRelay, log files are kept in your user data folder:
+```
+C:\Users\[YourUsername]\AppData\Roaming\CtrlRelay\
+```
+This helps debug issues if needed. Delete this folder manually if you want to remove everything.
 
 ## Technologies Used
 

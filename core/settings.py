@@ -1,5 +1,28 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
+
+def get_log_path():
+    """
+    Get the appropriate log file path.
+    - Portable mode (EXE folder writable): log next to EXE
+    - Installed mode (Program Files): log in AppData
+    """
+    try:
+        # Try to get the directory where the EXE/script is located
+        exe_path = Path(os.path.abspath(__file__)).parent
+        log_in_exe_dir = exe_path / "ctrlrelay.log"
+
+        # Try to write to EXE folder
+        with open(log_in_exe_dir, 'a'):
+            pass
+        return str(log_in_exe_dir)
+    except (PermissionError, OSError):
+        # Can't write to EXE folder (installed mode), use AppData
+        appdata = Path(os.getenv('APPDATA', '')) / 'CtrlRelay'
+        appdata.mkdir(parents=True, exist_ok=True)
+        return str(appdata / 'ctrlrelay.log')
+
 load_dotenv() 
 
 def setup_env():
@@ -67,7 +90,7 @@ def reload_settings():
     RUN_COMMAND_ENABLED = _bool("RUN_COMMAND_ENABLED", True)
     TYPE_ENABLED = _bool("TYPE_ENABLED", True)
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-    LOG_FILE = os.getenv("LOG_FILE", "ctrlrelay.log")
+    LOG_FILE = get_log_path()  # Auto-detect: EXE folder or AppData
 
 
 def _bool(key: str, default: bool = True) -> bool:
@@ -111,5 +134,5 @@ TYPE_ENABLED: bool = _bool("TYPE_ENABLED", True)
  
 # Logging
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
-LOG_FILE: str = os.getenv("LOG_FILE", "ctrlrelay.log")
+LOG_FILE: str = get_log_path()  # Auto-detect: EXE folder or AppData
  
