@@ -2,13 +2,9 @@ import threading, os, pystray, asyncio, inspect, sys
 from enum import Enum
 from PIL import Image
 
-#DEFAULT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CtrlRelay.log")
-#ENV = DEFAULT_LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-
 basedir = os.path.dirname(os.path.abspath(__file__))
 
 iconsdir = os.path.join(basedir, "icons")
-
 
 def _get_base_dir():
     if getattr(sys, 'frozen', False):
@@ -16,7 +12,28 @@ def _get_base_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 ENV = os.path.join(_get_base_dir(), ".env")
-DEFAULT_LOG_FILE = os.path.join(_get_base_dir(), "CtrlRelay.log")
+
+def get_log_path():
+    """
+    Get the appropriate log file path.
+    - Portable mode (EXE folder writable): log next to EXE
+    - Installed mode (Program Files): log in AppData
+    """
+    try:
+        exe_dir = _get_base_dir()
+        log_in_exe_dir = os.path.join(exe_dir, "ctrlrelay.log")
+
+        # Try to write to EXE folder
+        with open(log_in_exe_dir, 'a'):
+            pass
+        return log_in_exe_dir
+    except (PermissionError, OSError):
+        # Can't write to EXE folder (installed mode), use AppData
+        appdata = os.path.join(os.getenv('APPDATA', ''), 'CtrlRelay')
+        os.makedirs(appdata, exist_ok=True)
+        return os.path.join(appdata, 'ctrlrelay.log')
+
+DEFAULT_LOG_FILE = get_log_path()
 
 class TrayIcons(Enum):
     STARTING = Image.open(iconsdir + "/Starting.png")
