@@ -7,7 +7,7 @@ A lightweight Windows utility that lets you control your PC remotely through a T
 [![Release](https://img.shields.io/badge/release-v1.0.0-green)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-https://github.com/user-attachments/assets/5d3012ce-1260-4cff-be1d-a05e532639f0
+https://github.com/user-attachments/assets/82567ee8-be23-4e33-884f-64df0c16bcd1
 
 ## Features
 
