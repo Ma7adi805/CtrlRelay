@@ -1,4 +1,4 @@
-import os
+import os, sys
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -26,13 +26,21 @@ def get_log_path():
 load_dotenv() 
 
 def setup_env():
-    if os.path.exists(".env"):
-        load_dotenv()
+    # Get the proper .env path (same location as EXE)
+    if getattr(sys, 'frozen', False):
+        # Running as EXE
+        env_path = os.path.join(os.path.dirname(sys.executable), ".env")
+    else:
+        # Running as script
+        env_path = ".env"
+
+    if os.path.exists(env_path):
+        load_dotenv(dotenv_path=env_path)
     else:
         # Create a default .env file if it doesn't exist
-        from bot_utils.logger import logger
-        with open(".env", "w", encoding="utf-8") as f:
-            Format = r"""# CtrlRelay Configuration Template
+        try:
+            with open(env_path, "w", encoding="utf-8") as f:
+                Format = r"""# CtrlRelay Configuration Template
 # Copy this file to .env and fill in your values
 
 # --- Auth ---
@@ -61,9 +69,16 @@ TYPE_ENABLED=true            # Enable /type (remote keyboard input)
 # --- Logging  ---
 LOG_LEVEL=INFO               # DEBUG, INFO, ERROR
 LOG_FILE=ctrlrelay.log"""
-            f.write(Format)
-            del Format
+                f.write(Format)
+                del Format
+            from bot_utils.logger import logger
             logger.info("Created default .env file. Please configure it before running the bot.")
+        except PermissionError:
+            # Can't create .env, app will fail gracefully later when config is missing
+            pass
+
+        # Load the newly created .env file
+        load_dotenv(dotenv_path=env_path)
 
 def reload_settings():
     """Reload all settings from .env file"""

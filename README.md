@@ -7,7 +7,7 @@ A lightweight Windows utility that lets you control your PC remotely through a T
 [![Release](https://img.shields.io/badge/release-v1.0.0-green)](https://github.com/Ma7adi805/CtrlRelay/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-https://github.com/user-attachments/assets/1226e185-2786-4c5a-849f-360b6e027cbc
+https://github.com/user-attachments/assets/5d3012ce-1260-4cff-be1d-a05e532639f0
 
 ## Features
 
@@ -44,9 +44,11 @@ Buttons are automatically enabled or disabled based on the current state, so you
 ## Uninstalling
 
 When you uninstall CtrlRelay, log files are kept in your user data folder:
+
 ```
 C:\Users\[YourUsername]\AppData\Roaming\CtrlRelay\
 ```
+
 This helps debug issues if needed. Delete this folder manually if you want to remove everything.
 
 ## Technologies Used
